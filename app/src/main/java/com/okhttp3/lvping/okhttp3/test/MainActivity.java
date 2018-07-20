@@ -1,57 +1,67 @@
-package com.okhttp3.lvping.okhttp3;
+package com.okhttp3.lvping.okhttp3.test;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.okhttp3.lvping.okhttp3.okhttp.ProgressListener;
-import com.okhttp3.lvping.okhttp3.okhttp.ProgressResponseBody;
-import com.okhttp3.lvping.okhttp3.okhttp.SimpleHttpClient;
+import com.okhttp3.lvping.okhttp3.R;
+import com.okhttp3.lvping.okhttp3.okhttp3.ProgressListener;
+import com.okhttp3.lvping.okhttp3.okhttp3.ProgressResponseBody;
+import com.okhttp3.lvping.okhttp3.okhttp3.BaseCallback;
+import com.okhttp3.lvping.okhttp3.okhttp3.BaseResult;
 import com.okhttp3.lvping.okhttp3.okhttp3.SimpleOkhttp3;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.FormBody;
 import okhttp3.Interceptor;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity {
-    private final String URL = "http://v.juhe.cn/toutiao/index?type=top&key=c0aa53b4b2fee9ca8cb6ee0776ad25f3";
-    private final String fileName = "ChiefStore.apk";
-    OkHttpClient okHttpClient;
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    private final String fileName = "downloadtest.apk";
+    private OkHttpClient okHttpClient;
+    EditText user_name;
+    EditText user_pwd;
+    Button btn_login, btn_get, download;
+    TextView tv_content;
     private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        progressBar = findViewById(R.id.progressBar);
         initOkhttp();
+        progressBar = findViewById(R.id.progressBar);
+        btn_login = findViewById(R.id.login);
+        user_name = findViewById(R.id.user_name);
+        user_pwd = findViewById(R.id.user_pwd);
+        tv_content = findViewById(R.id.tv_content);
+        btn_get = findViewById(R.id.btn_get);
+        download = findViewById(R.id.download);
+        btn_login.setOnClickListener(this);
+        btn_get.setOnClickListener(this);
+        download.setOnClickListener(this);
     }
 
     private void initOkhttp() {
@@ -65,87 +75,60 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //get请求
-    public void getReq(View v) {
+    private void getReq() {
+        SimpleOkhttp3.newBuilder().url(Api.NEWS)
+                .get()
+                .build()
+                .enqueue(new BaseCallback() {
+                    @Override
+                    public void onSuccess(Object o) {
+                        super.onSuccess(o);
+                        tv_content.setText(o.toString());
+                    }
 
+                    @Override
+                    public void onError(int code) {
+                        super.onError(code);
+                    }
 
-
-//        Request request = new Request.Builder().get().url(URL).build();
-//        okHttpClient.newCall(request).enqueue(new Callback() {
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//            }
-//
-//            @Override
-//            public void onResponse(Call call, Response response) throws IOException {
-//
-//                if (response.isSuccessful()) {
-//                    Log.e("response", response.body().string());
-//
-//                }
-//                if (response.body() != null) {
-//                    response.body().close();
-//                }
-//            }
-//        });
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        super.onFailure(call, e);
+                    }
+                });
     }
 
     //post请求
-    public void postReq(View v) {
-        String username = "qw123456";
-        String userpassword = "123456";
-        LoginWithForm(username, userpassword);
+    private void postReq() {
+        SimpleOkhttp3.newBuilder().url(Api.LOGIN)
+                .addParam("userAccount", user_name.getText().toString().trim())
+                .addParam("userPass", user_pwd.getText().toString().trim())
+                .post()
+                .json()
+                .build().enqueue(new BaseCallback<BaseResult>() {
+            @Override
+            public void onSuccess(BaseResult baseResult) {
+                super.onSuccess(baseResult);
+                Toast.makeText(MainActivity.this, baseResult.getMsg().toString(), Toast.LENGTH_SHORT).show();
+            }
 
+            @Override
+            public void onError(int code) {
+                super.onError(code);
+            }
 
-    }
-
-    private void LoginWithForm(String username, String userpassword) {
-        RequestBody requestBody = new FormBody.Builder().add("username", username).add("userpassword", userpassword).build();
-        Request request = new Request.Builder().post(requestBody).url(URL).build();
-        okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-
-
-            }
-        });
-    }
-
-    private void LoginWithJson(String username, String userpassword) {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("username", username);
-            jsonObject.put("userpassword", userpassword);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        String jsonParams = jsonObject.toString();
-        Toast.makeText(MainActivity.this, jsonParams, Toast.LENGTH_SHORT).show();
-
-
-        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"), jsonParams);
-        Request request = new Request.Builder().post(requestBody).url(URL).build();
-        okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-
-
+                super.onFailure(call, e);
             }
         });
     }
 
     //文件下载(普通方式&拦截器)
-    public void download(View v) {
+    private void download() {
         requestPermission();
         Request request = new Request.Builder()
-                .url("https://dm.chiefchain.cn/apks/ChiefStore.apk")
+                .url(Api.DOWNLOAD)
                 .build();
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
@@ -163,17 +146,17 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            if (msg.what == 1) {
-                int progress = msg.arg1;
-                progressBar.setProgress(progress);
-
-            }
-        }
-    };
+//    Handler handler = new Handler() {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            super.handleMessage(msg);
+//            if (msg.what == 1) {
+//                int progress = msg.arg1;
+//                progressBar.setProgress(progress);
+//
+//            }
+//        }
+//    };
 
     private void writeFile(Response response) throws IOException {
         InputStream is = null;
@@ -190,11 +173,6 @@ public class MainActivity extends AppCompatActivity {
             //long sum = 0;
             while ((len = is.read(bytes)) != -1) {
                 fos.write(bytes);
-//                sum += len;
-//                int progress = (int) ((sum * 1.0f / totalSize) * 100);
-//                Message msg = handler.obtainMessage(1);
-//                msg.arg1 = progress;
-//                handler.sendMessage(msg);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -208,6 +186,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_get:
+                getReq();
+                break;
+            case R.id.login:
+                postReq();
+                break;
+            case R.id.download:
+                download();
+                break;
+        }
+    }
+
     class Prg implements ProgressListener {
 
         @Override
@@ -218,8 +211,6 @@ public class MainActivity extends AppCompatActivity {
                     progressBar.setProgress(progress);
                 }
             });
-
-
         }
 
         @Override

@@ -1,9 +1,7 @@
-package com.okhttp3.lvping.okhttp3.okhttp;
+package com.okhttp3.lvping.okhttp3.okhttp3;
 
 import android.support.annotation.Nullable;
-
 import java.io.IOException;
-
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import okio.Buffer;
@@ -11,7 +9,6 @@ import okio.BufferedSource;
 import okio.ForwardingSource;
 import okio.Okio;
 import okio.Source;
-
 public class ProgressResponseBody extends ResponseBody {
     private ResponseBody mResponseBody;
     private BufferedSource mSource;
@@ -21,13 +18,11 @@ public class ProgressResponseBody extends ResponseBody {
         this.mResponseBody = responseBody;
         this.listener = progressListener;
     }
-
     @Nullable
     @Override
     public MediaType contentType() {
         return mResponseBody.contentType();
     }
-
     @Override
     public long contentLength() {
         return mResponseBody.contentLength();
@@ -41,12 +36,10 @@ public class ProgressResponseBody extends ResponseBody {
         }
         return mSource;
     }
-
     private Source getSource(Source source) {
         return new ForwardingSource(source) {
             long totalSize = 0l;
             long sum = 0l;
-
             @Override
             public long read(Buffer sink, long byteCount) throws IOException {
                 if (totalSize == 0) {
