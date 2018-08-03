@@ -4,9 +4,12 @@ package com.okhttp3.lvping.okhttp3.okhttp3;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+
 import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -42,7 +45,7 @@ public class OkhttpManager {
                 .connectTimeout(30, TimeUnit.SECONDS).build();
     }
 
-    public void request(SimpleOkhttp3 simpleOkhttp3, final BaseCallback callback){
+    public void request(SimpleOkhttp3 simpleOkhttp3, final BaseCallback callback) {
         if (callback == null) {
             throw new NullPointerException("callback is null");
 
@@ -55,7 +58,7 @@ public class OkhttpManager {
             }
 
             @Override
-            public void onResponse(Call call, Response response){
+            public void onResponse(Call call, Response response) {
                 if (response.isSuccessful()) {
                     String result = null;
                     try {

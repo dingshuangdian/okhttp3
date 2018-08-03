@@ -20,23 +20,29 @@ public class SimpleOkhttp3 {
     private SimpleOkhttp3(Builder builder) {
         this.mBuilder = builder;
     }
+
     public static Builder newBuilder() {
         return new Builder();
     }
-    public void enqueue(BaseCallback callback){
+
+    public void enqueue(BaseCallback callback) {
         OkhttpManager.getInstance().request(this, callback);
     }
+
     public static class Builder {
         private String mUrl;
         private String method;
         private boolean isJsonParam;
         private List<RequestParam> mParams;
+
         private Builder() {
             method = "GET";
         }
+
         public SimpleOkhttp3 build() {
             return new SimpleOkhttp3(this);
         }
+
         public Builder get() {
             method = "GET";
             return this;
@@ -51,6 +57,7 @@ public class SimpleOkhttp3 {
             isJsonParam = true;
             return this;
         }
+
         public Builder url(String url) {
             this.mUrl = url;
             return this;
@@ -65,7 +72,7 @@ public class SimpleOkhttp3 {
         }
     }
 
-    public Request buildRequest(){
+    public Request buildRequest() {
         Request.Builder builder = new Request.Builder();
         if (mBuilder.method == "GET") {
             builder.url(buildGetRequestParam());
@@ -93,7 +100,8 @@ public class SimpleOkhttp3 {
         Log.e("url", url);
         return url;
     }
-    private RequestBody buildRequestBody(){
+
+    private RequestBody buildRequestBody() {
         //json形式传递
         if (mBuilder.isJsonParam) {
             JSONObject jsonObject = new JSONObject();
